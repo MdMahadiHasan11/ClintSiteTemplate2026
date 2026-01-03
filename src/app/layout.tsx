@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import ReduxProvider from "@/provider/redux-provider";
 import { SessionProvider } from "@/provider/session-provider";
+import { ThemeProvider } from "@/provider/theme-provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./../styles/globals.css";
@@ -27,12 +28,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionProvider>
-          <ReduxProvider>{children}</ReduxProvider>
+          <ReduxProvider>
+            {" "}
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+            </ThemeProvider>
+          </ReduxProvider>
         </SessionProvider>
         <Toaster />
       </body>
