@@ -27,15 +27,15 @@ export const SessionProvider = ({
   const [session, setSession] = useState<TSession | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const fetchSession = async () => {
-    const session = await getSession();
-    setSession(session);
-    setIsLoading(false);
-  };
-
   useEffect(() => {
+    const fetchSession = async () => {
+      const sessionData = await getSession();
+      setSession(sessionData);
+      setIsLoading(false);
+    };
+
     fetchSession();
-  }, [isLoading]);
+  }, []); // Empty array: run only once on mount
 
   return (
     <SessionContext.Provider

@@ -45,7 +45,10 @@ export async function sendLoginRequest(formData: SigninRequestFormValues) {
     };
   }
 
+  console.log({ validatedFields });
+
   try {
+    console.log(config.host, "host");
     const res = await fetch(`${config.host}/api/v1/auth/login/initiate`, {
       method: "POST",
       headers: {
@@ -72,10 +75,10 @@ export async function sendLoginRequest(formData: SigninRequestFormValues) {
       const decryptedRefreshToken = await decrypt(result?.data?.refreshToken);
 
       const accessTokenExpire = new Date(
-        (decryptedAccessToken?.exp || 24 * 60 * 60) * 1000,
+        (decryptedAccessToken?.exp || 24 * 60 * 60) * 1000
       );
       const refreshTokenExpire = new Date(
-        (decryptedRefreshToken?.exp || 365 * 24 * 60 * 60) * 1000,
+        (decryptedRefreshToken?.exp || 365 * 24 * 60 * 60) * 1000
       );
 
       // Store permissions in cookie instead of Redis
@@ -85,6 +88,7 @@ export async function sendLoginRequest(formData: SigninRequestFormValues) {
       //     accessTokenExpire,
       //   );
       // }
+      console.log(result?.data?.accessToken, "new");
 
       await SetAccessToken(result?.data?.accessToken, accessTokenExpire);
       await SetRefreshToken(result?.data?.accessToken, refreshTokenExpire);
@@ -143,17 +147,17 @@ export async function signin(formData: SigninFormValues) {
       const decryptedRefreshToken = await decrypt(result?.data?.refreshToken);
 
       const accessTokenExpire = new Date(
-        (decryptedAccessToken?.exp || 24 * 60 * 60) * 1000,
+        (decryptedAccessToken?.exp || 24 * 60 * 60) * 1000
       );
       const refreshTokenExpire = new Date(
-        (decryptedRefreshToken?.exp || 365 * 24 * 60 * 60) * 1000,
+        (decryptedRefreshToken?.exp || 365 * 24 * 60 * 60) * 1000
       );
 
       // Store permissions in cookie instead of Redis
       if (result?.data?.permissions) {
         await SetPermissions(
           JSON.stringify(result?.data?.permissions),
-          accessTokenExpire,
+          accessTokenExpire
         );
       }
 
@@ -230,7 +234,7 @@ export async function ChangePassword(formData: PasswordSetValues) {
   }
 
   try {
-    const sessionCookie = cookies().get("session");
+    const sessionCookie = (await cookies()).get("session");
 
     const res = await fetch(`${config.host}/api/v1/auth/change-password`, {
       method: "POST",
@@ -246,7 +250,7 @@ export async function ChangePassword(formData: PasswordSetValues) {
     });
 
     const result = await res.json();
-    cookies().delete("is_change_password");
+    (await cookies()).delete("is_change_password");
 
     if (!result?.success) {
       return {
@@ -324,12 +328,11 @@ export async function signup(formData: SignupFormValues) {
 }
 
 export async function signout() {
-  const sessionCookie = cookies().get("session");
-  const accessTokenCookie = cookies().get("accessToken");
+  const sessionCookie = (await cookies()).get("session");
+  const accessTokenCookie = (await cookies()).get("accessToken");
 
   // Delete permissions cookie during logout
-  cookies().delete("permissions");
-
+  (await cookies()).delete("permissions");
   fetch(config.host + "/api/v1/auth/logout", {
     headers: {
       Authorization: `Bearer ${sessionCookie?.value}` || "",
@@ -337,8 +340,8 @@ export async function signout() {
     method: "POST",
     cache: "no-store",
   });
-  cookies().delete("accessToken");
-  cookies().delete("refreshToken");
-  // cookies().delete("permissions");
+  (await cookies()).delete("accessToken");
+  (await cookies()).delete("refreshToken");
+  // (await cookies()).delete("permissions");
   redirect("/auth/signin");
 }

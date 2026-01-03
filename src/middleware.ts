@@ -5,7 +5,7 @@ import { decrypt, DecryptedSession } from "./lib/session";
 
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
-  const token = req.cookies.get("accessTokenn")?.value;
+  const token = req.cookies.get("accessToken")?.value;
 
   let session: DecryptedSession | null = null;
 
