@@ -10,7 +10,12 @@ export const metadata: Metadata = {
 export default function DashboardPage() {
   return (
     <Layout>
-      <Content />
+      <Content>
+        {/* Dashboard content goes here */}
+        <div className="text-gray-600 dark:text-gray-400">
+          Welcome to your CMS Dashboard
+        </div>
+      </Content>
     </Layout>
   );
 }

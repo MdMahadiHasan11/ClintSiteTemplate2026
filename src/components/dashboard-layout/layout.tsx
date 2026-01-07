@@ -12,7 +12,6 @@ interface LayoutProps {
 type MenuState = "full" | "collapsed" | "hidden";
 
 export default function Layout({ children }: LayoutProps) {
-  // Remove mounted state entirely — we'll use a ref + conditional rendering trick
   const [menuState, setMenuState] = useState<MenuState>("full");
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(256);
@@ -21,7 +20,6 @@ export default function Layout({ children }: LayoutProps) {
   const [previousDesktopState, setPreviousDesktopState] =
     useState<MenuState>("full");
 
-  // Handle window resize
   useEffect(() => {
     const handleResize = () => {
       const isDesktop = window.innerWidth >= 1024;
@@ -38,7 +36,7 @@ export default function Layout({ children }: LayoutProps) {
       }
     };
 
-    handleResize(); // Initial check
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [menuState, previousDesktopState]);
@@ -90,14 +88,11 @@ export default function Layout({ children }: LayoutProps) {
     return `${sidebarWidth}px`;
   };
 
-  // Render nothing on first server render (avoids hydration mismatch)
-  // Then instantly render on client — no setState in effect needed
-  if (typeof window === "undefined") {
-    return null;
-  }
-
   return (
-    <div className="flex h-screen">
+    <div
+      className="flex h-screen bg-white dark:bg-[#0F0F12]"
+      suppressHydrationWarning
+    >
       <Sidebar
         menuState={menuState}
         mobileMenuState={mobileMenuState}

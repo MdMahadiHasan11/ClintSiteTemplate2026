@@ -1,8 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CRUDOperation, menuData, MenuItem, SubMenuItem } from "@/constants";
+import {
+  type CRUDOperation,
+  menuData,
+  type MenuItem,
+  type SubMenuItem,
+} from "@/constants";
+
 type PermissionsObject = Record<string, CRUDOperation[]>;
 
-// for middleware
+/**
+ * Recursively extracts all href values from a menu hierarchy
+ */
 export function getHrefValues(data: any[]): string[] {
   const hrefs: string[] = [];
 
@@ -10,24 +18,20 @@ export function getHrefValues(data: any[]): string[] {
     if (!Array.isArray(items)) return;
 
     for (const item of items) {
-      // If item is an array, recursively traverse it
       if (Array.isArray(item)) {
         traverse(item);
         continue;
       }
 
-      // Check if item has children (non-empty array)
       const hasChildren =
         item?.children &&
         Array.isArray(item.children) &&
         item.children.length > 0;
 
-      // Only add href if item has no children and has an href
       if (item?.href && !hasChildren) {
         hrefs.push(item.href);
       }
 
-      // Recursively traverse children if they exist
       if (hasChildren) {
         traverse(item.children);
       }
@@ -38,6 +42,9 @@ export function getHrefValues(data: any[]): string[] {
   return hrefs;
 }
 
+/**
+ * Gets all accessible hrefs based on user permissions
+ */
 export function sidebarAllHref({
   permissions,
 }: {
@@ -45,32 +52,30 @@ export function sidebarAllHref({
 }) {
   const middlewareHref = menuData
     ?.map((item) => filterByPermissions(item.items, permissions))
-    .filter((section) => section.length > 0 && section.length > 0);
+    .filter((section) => section.length > 0);
 
-  const middleWareData = getHrefValues(middlewareHref);
-  return middleWareData;
+  return getHrefValues(middlewareHref);
 }
 
-//
-//
-//main menu data for sidebar
-
+/**
+ * Checks if a user has a specific permission
+ */
 export function hasPermissionSet(
   permissions: PermissionsObject,
   permissionKey?: string,
   requiredOperation: CRUDOperation = "READ"
 ): boolean {
-  // If no permission key is specified, allow access
   if (!permissionKey) return true;
-  // Check if the permission key exists in user permissions
-  const operations = (permissions as PermissionsObject)[permissionKey] || [];
 
-  // If the key doesn't exist or has no operations, deny access
+  const operations = permissions[permissionKey] || [];
   if (!operations || operations.length === 0) return false;
 
-  // Check if the required operation is in the allowed operations
   return operations.includes(requiredOperation);
 }
+
+/**
+ * Filters submenu items based on permissions
+ */
 const filterSubMenuByPermissions = (
   items: SubMenuItem[],
   permissions: PermissionsObject
@@ -94,6 +99,9 @@ const filterSubMenuByPermissions = (
     });
 };
 
+/**
+ * Filters menu items based on permissions
+ */
 const filterByPermissions = (
   items: MenuItem[],
   permissions: PermissionsObject
@@ -116,6 +124,10 @@ const filterByPermissions = (
       return item;
     });
 };
+
+/**
+ * Filters menu items by search query
+ */
 const filterMenuItems = (items: MenuItem[], query: string): MenuItem[] => {
   if (!query.trim()) return items;
 
@@ -150,6 +162,9 @@ const filterMenuItems = (items: MenuItem[], query: string): MenuItem[] => {
     .filter(Boolean) as MenuItem[];
 };
 
+/**
+ * Gets filtered menu data based on permissions and search query
+ */
 export function mainMenuData({
   searchQuery,
   permissions,
@@ -166,5 +181,6 @@ export function mainMenuData({
       ),
     }))
     .filter((section) => section.items.length > 0);
+
   return filteredMenuData;
 }

@@ -6,7 +6,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { MenuItem, SubMenuItem } from "@/constants";
+import type { MenuItem, SubMenuItem } from "@/constants";
 import { usePermissions } from "@/hooks/use-permission";
 import { hasPermissionSet, mainMenuData } from "@/lib/permission-function";
 import { cn } from "@/lib/utils";
@@ -21,8 +21,8 @@ import {
 import Link from "next/link";
 import type React from "react";
 import { useState } from "react";
+
 type MenuState = "full" | "collapsed" | "hidden";
-// type PermissionsObject = Record<string, CRUDOperation[]>;
 
 interface SidebarProps {
   menuState: MenuState;
@@ -109,14 +109,14 @@ export default function Sidebar({
       ? mobileMenuState === "full"
       : menuState === "full";
     const showExpandIcon = hasChildren && showText;
+    const isCollapsed = isMobile
+      ? mobileMenuState === "collapsed"
+      : menuState === "collapsed";
 
     const paddingLeft =
       level === 0 ? "px-3" : level === 1 ? "pl-8 pr-3" : "pl-12 pr-3";
 
     const [popoverOpen, setPopoverOpen] = useState(false);
-    const isCollapsed = isMobile
-      ? mobileMenuState === "collapsed"
-      : menuState === "collapsed";
 
     const renderPopoverContent = () => {
       if (!hasChildren) {
@@ -173,7 +173,7 @@ export default function Sidebar({
     const content = (
       <div
         className={cn(
-          "flex items-center py-2 text-sm rounded-md transition-colors sidebar-menu-item hover:bg-gray-50 dark:hover:bg-[#1F1F23] relative group cursor-pointer",
+          "flex items-center py-2 text-sm rounded-md transition-colors hover:bg-gray-50 dark:hover:bg-[#1F1F23] cursor-pointer",
           paddingLeft
         )}
         onClick={() => {
@@ -202,17 +202,13 @@ export default function Sidebar({
         }}
         title={isCollapsed ? item.label : undefined}
       >
-        {item.icon && (
-          <item.icon className="h-4 w-4 shrink-0 sidebar-menu-icon" />
-        )}
+        {item.icon && <item.icon className="h-4 w-4 shrink-0" />}
 
         {showText && (
           <>
-            <span className="ml-3 flex-1 transition-opacity duration-200 sidebar-menu-text">
-              {item.label}
-            </span>
+            <span className="ml-3 flex-1">{item.label}</span>
 
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center gap-1">
               {item.isNew && (
                 <span className="px-1.5 py-0.5 text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full">
                   New
@@ -227,7 +223,7 @@ export default function Sidebar({
                 <ChevronDown
                   className={cn(
                     "h-3 w-3 transition-transform duration-200",
-                    isExpanded ? "rotate-180" : "rotate-0"
+                    isExpanded ? "rotate-180" : ""
                   )}
                 />
               )}
@@ -338,7 +334,7 @@ export default function Sidebar({
         {item.icon && <item.icon className="h-3 w-3 shrink-0 mr-2" />}
         <span className="flex-1">{item.label}</span>
 
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center gap-1">
           {item.isNew && (
             <span className="px-1 py-0.5 text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded">
               New
@@ -353,7 +349,7 @@ export default function Sidebar({
             <ChevronDown
               className={cn(
                 "h-3 w-3 transition-transform duration-200",
-                isExpanded ? "rotate-180" : "rotate-0"
+                isExpanded ? "rotate-180" : ""
               )}
             />
           )}
@@ -395,150 +391,132 @@ export default function Sidebar({
 
   if (isMobile) {
     return (
-      <>
-        <nav
-          className={`
-            fixed inset-y-0 left-0 z-70 bg-white dark:bg-[#0F0F12]
-            border-r border-gray-200 dark:border-[#1F1F23]
-            transform transition-all duration-300 ease-in-out
-            ${
-              mobileMenuState === "hidden"
-                ? "-translate-x-full w-0"
-                : mobileMenuState === "collapsed"
-                ? "translate-x-0 w-16"
-                : "translate-x-0 w-64"
-            }
-          `}
-        >
-          {mobileMenuState !== "hidden" && (
-            <div className="h-full flex flex-col">
-              <div className="h-16 px-3 flex items-center justify-between border-b border-gray-200 dark:border-[#1F1F23]">
-                {mobileMenuState === "full" ? (
-                  <>
-                    <Link
-                      href="/dashboard-cms"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3"
-                    >
-                      <span className="text-lg font-semibold hover:cursor-pointer text-gray-900 dark:text-white">
-                        MH
-                      </span>
-                    </Link>
-                    <button
-                      onClick={onToggleMenuState}
-                      className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                      title="Hide sidebar"
-                    >
-                      <Menu className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                    </button>
-                  </>
-                ) : (
-                  <div className="flex justify-center w-full">
-                    <Link
-                      href="/dashboard-cms"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3"
-                    >
-                      <div className="flex justify-center w-full">MH</div>
-                    </Link>
-                  </div>
-                )}
-              </div>
-
-              {mobileMenuState === "full" && (
-                <div className="px-3 py-3 border-b border-gray-200 dark:border-[#1F1F23]">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      type="text"
-                      placeholder="Search menu..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 pr-8 h-9 text-sm"
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
+      <nav
+        className={cn(
+          "fixed inset-y-0 left-0 z-70 bg-white dark:bg-[#0F0F12]",
+          "border-r border-gray-200 dark:border-[#1F1F23]",
+          "transform transition-all duration-300 ease-in-out",
+          mobileMenuState === "hidden" && "-translate-x-full w-0",
+          mobileMenuState === "collapsed" && "translate-x-0 w-16",
+          mobileMenuState === "full" && "translate-x-0 w-64"
+        )}
+      >
+        {mobileMenuState !== "hidden" && (
+          <div className="h-full flex flex-col">
+            <div className="h-16 px-3 flex items-center justify-between border-b border-gray-200 dark:border-[#1F1F23]">
+              {mobileMenuState === "full" ? (
+                <>
+                  <Link
+                    href="/dashboard-cms"
+                    className="flex items-center gap-3"
+                  >
+                    <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                      MH
+                    </span>
+                  </Link>
+                  <button
+                    onClick={onToggleMenuState}
+                    className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    title="Hide sidebar"
+                  >
+                    <Menu className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                  </button>
+                </>
+              ) : (
+                <div className="flex justify-center w-full">
+                  <Link href="/dashboard-cms">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      MH
+                    </span>
+                  </Link>
                 </div>
               )}
+            </div>
 
-              <div
-                className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2 scrollbar-none"
-                style={{
-                  scrollbarWidth: "none",
-                  msOverflowStyle: "none",
-                }}
-              >
-                <div className="space-y-6">
-                  {filteredMenuData.map((section) => (
-                    <div key={section.id}>
-                      {mobileMenuState === "full" && (
-                        <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider sidebar-section-label">
-                          {section.label}
-                        </div>
-                      )}
-                      <div className="space-y-1">
-                        {section.items.map((item) => (
-                          <NavItem
-                            key={item.id}
-                            item={item}
-                            parentId={section.id}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+            {mobileMenuState === "full" && (
+              <div className="px-3 py-3 border-b border-gray-200 dark:border-[#1F1F23]">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Search menu..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-8 h-9 text-sm"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               </div>
+            )}
 
-              <div className="px-2 py-4 border-t border-gray-200 dark:border-[#1F1F23]">
-                <div className="space-y-1">
-                  <NavItem
-                    item={{
-                      id: "settings",
-                      label: "Settings",
-                      href: "/settings",
-                      icon: Settings,
-                    }}
-                  />
-                  <NavItem
-                    item={{
-                      id: "help",
-                      label: "Help",
-                      href: "/help",
-                      icon: HelpCircle,
-                    }}
-                  />
-                </div>
+            <div
+              className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              <div className="space-y-6">
+                {filteredMenuData.map((section) => (
+                  <div key={section.id}>
+                    {mobileMenuState === "full" && (
+                      <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        {section.label}
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                      {section.items.map((item) => (
+                        <NavItem
+                          key={item.id}
+                          item={item}
+                          parentId={section.id}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          )}
-        </nav>
-      </>
+
+            <div className="px-2 py-4 border-t border-gray-200 dark:border-[#1F1F23]">
+              <div className="space-y-1">
+                <NavItem
+                  item={{
+                    id: "settings",
+                    label: "Settings",
+                    href: "/settings",
+                    icon: Settings,
+                  }}
+                />
+                <NavItem
+                  item={{
+                    id: "help",
+                    label: "Help",
+                    href: "/help",
+                    icon: HelpCircle,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
     );
   }
 
   return (
     <nav
-      className={`
-        fixed inset-y-0 left-0 z-60 bg-white dark:bg-[#0F0F12]
-        border-r border-gray-200 dark:border-[#1F1F23] transition-all duration-300 ease-in-out
-        ${
-          menuState === "hidden"
-            ? "w-0 border-r-0"
-            : menuState === "collapsed"
-            ? "w-16"
-            : ""
-        }
-      `}
+      className={cn(
+        "fixed inset-y-0 left-0 z-60 bg-white dark:bg-[#0F0F12]",
+        "border-r border-gray-200 dark:border-[#1F1F23]",
+        "transition-all duration-300 ease-in-out",
+        menuState === "hidden" && "w-0 border-r-0",
+        menuState === "collapsed" && "w-16"
+      )}
       style={{
         overflow: menuState === "hidden" ? "hidden" : "visible",
         width:
@@ -555,22 +533,20 @@ export default function Sidebar({
             {showText ? (
               <Link
                 href="/dashboard-cms"
-                // target="_blank"
-                rel="noopener noreferrer"
                 className="flex items-center gap-3 w-full"
               >
-                <span className="text-lg font-semibold hover:cursor-pointer text-gray-900 dark:text-white transition-opacity duration-200">
+                <span className="text-lg font-semibold text-gray-900 dark:text-white">
                   MH.com
                 </span>
               </Link>
             ) : (
               <Link
                 href="/dashboard-cms"
-                // target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 w-full"
+                className="flex items-center justify-center w-full"
               >
-                <div className="flex justify-center w-full">MH</div>
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                  MH
+                </span>
               </Link>
             )}
           </div>
@@ -578,7 +554,7 @@ export default function Sidebar({
           {showText && (
             <div className="px-3 py-3 border-b border-gray-200 dark:border-[#1F1F23]">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   type="text"
                   placeholder="Search menu..."
@@ -589,7 +565,7 @@ export default function Sidebar({
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -599,17 +575,14 @@ export default function Sidebar({
           )}
 
           <div
-            className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2 scrollbar-none"
-            style={{
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-            }}
+            className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             <div className="space-y-6">
               {filteredMenuData.map((section) => (
                 <div key={section.id}>
                   {showText && (
-                    <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider sidebar-section-label transition-opacity duration-200">
+                    <div className="px-3 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                       {section.label}
                     </div>
                   )}
@@ -626,6 +599,14 @@ export default function Sidebar({
               ))}
             </div>
           </div>
+
+          {menuState === "full" && (
+            <div
+              className="absolute bottom-0 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 cursor-col-resize hover:bg-blue-400 dark:hover:bg-blue-600 transition-colors"
+              onMouseDown={handleMouseDown}
+              title="Drag to resize sidebar"
+            />
+          )}
 
           <div className="px-2 py-4 border-t border-gray-200 dark:border-[#1F1F23]">
             <div className="space-y-1">
@@ -647,15 +628,6 @@ export default function Sidebar({
               />
             </div>
           </div>
-
-          {menuState === "full" && (
-            <div
-              className="absolute top-0 right-0 w-1 h-full cursor-col-resize bg-transparent hover:bg-blue-500/20 transition-colors group"
-              onMouseDown={handleMouseDown}
-            >
-              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-gray-300 dark:bg-gray-600 rounded-l opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          )}
         </div>
       )}
     </nav>

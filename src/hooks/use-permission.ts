@@ -1,6 +1,6 @@
 "use client";
 
-import { PermissionsObject } from "@/constants";
+import type { PermissionsObject } from "@/constants";
 import { useEffect, useState } from "react";
 
 // Mock function - replace with your actual API call
@@ -15,7 +15,7 @@ async function fetchUserPermissions(): Promise<PermissionsObject> {
 }
 
 export function usePermissions() {
-  const [permissions, setPermissions] = useState({});
+  const [permissions, setPermissions] = useState<PermissionsObject>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

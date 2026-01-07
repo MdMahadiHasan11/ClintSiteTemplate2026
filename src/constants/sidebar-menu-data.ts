@@ -1,3 +1,4 @@
+import type React from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Activity,
@@ -5,11 +6,8 @@ import {
   Bell,
   Bookmark,
   Building2,
-  Calendar,
-  Camera,
   Check,
   Clock,
-  Code,
   CreditCard,
   Database,
   DollarSign,
@@ -23,23 +21,16 @@ import {
   Headphones,
   Home,
   ImageIcon,
-  Key,
-  Layers,
   Lock,
-  Mail,
   Map,
   MessageSquare,
   MessagesSquare,
   Minus,
   Monitor,
   Package,
-  PieChart,
   Play,
-  Plus,
-  Puzzle,
   Receipt,
   Search,
-  Settings,
   Shield,
   ShoppingCart,
   Star,
@@ -52,24 +43,25 @@ import {
   UserPlus,
   Users2,
   UserX,
-  Video,
   Wallet,
-  Zap,
 } from "lucide-react";
+
+export type CRUDOperation = "CREATE" | "READ" | "UPDATE" | "DELETE";
+
 export type PermissionsObject = {
   [key: string]: CRUDOperation[];
 };
-export type CRUDOperation = "CREATE" | "READ" | "UPDATE" | "DELETE";
+
 export interface SubMenuItem {
   id: string;
   label: string;
-  href: string;
+  href?: string;
   icon?: React.ComponentType<any>;
   badge?: string;
   isNew?: boolean;
   children?: SubMenuItem[];
-  permissionKey?: string; // Added permission key to match API structure
-  requiredOperation?: CRUDOperation; // Added required operation (defaults to READ)
+  permissionKey?: string;
+  requiredOperation?: CRUDOperation;
 }
 
 export interface MenuItem {
@@ -80,8 +72,8 @@ export interface MenuItem {
   badge?: string;
   isNew?: boolean;
   children?: SubMenuItem[];
-  permissionKey?: string; // Added permission key
-  requiredOperation?: CRUDOperation; // Added required operation
+  permissionKey?: string;
+  requiredOperation?: CRUDOperation;
 }
 
 export interface MenuSection {
@@ -101,7 +93,6 @@ export const menuData: MenuSection[] = [
         href: "/dashboard-cms",
         icon: Home,
         badge: "3",
-        // permissionKey: "dashboard",
         children: [
           {
             id: "analytics",
@@ -115,7 +106,6 @@ export const menuData: MenuSection[] = [
             label: "Reports",
             href: "/dashboard/reports",
             icon: FileText,
-            // permissionKey: "reports",
             children: [
               {
                 id: "sales-reports",
@@ -124,13 +114,6 @@ export const menuData: MenuSection[] = [
                 icon: TrendingUp,
                 permissionKey: "sales_report",
               },
-              // {
-              //   id: "user-reports",
-              //   label: "User Reports",
-              //   href: "/dashboard/reports/users",
-              //   icon: Users2,
-              //   permissionKey: "reports",
-              // },
               {
                 id: "financial-reports",
                 label: "Financial Reports",
@@ -814,342 +797,26 @@ export const menuData: MenuSection[] = [
           {
             id: "direct-messages",
             label: "Direct Messages",
-            href: "/chat/dm",
-            icon: Mail,
-            permissionKey: "chat",
-          },
-          {
-            id: "notifications",
-            label: "Notifications",
-            href: "/chat/notifications",
-            icon: Bell,
+            href: "/chat/direct",
+            icon: MessageSquare,
+            badge: "3",
             permissionKey: "chat",
           },
         ],
       },
       {
-        id: "meetings",
-        label: "Meetings",
-        href: "/meetings",
-        icon: Video,
-        permissionKey: "meetings",
-        children: [
-          {
-            id: "scheduled",
-            label: "Scheduled",
-            href: "/meetings/scheduled",
-            icon: Calendar,
-            permissionKey: "meetings",
-          },
-          {
-            id: "recordings",
-            label: "Recordings",
-            href: "/meetings/recordings",
-            icon: Camera,
-            permissionKey: "meetings",
-          },
-          {
-            id: "rooms",
-            label: "Meeting Rooms",
-            href: "/meetings/rooms",
-            icon: Monitor,
-            permissionKey: "meetings",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "tools",
-    label: "Tools & Utilities",
-    items: [
-      {
-        id: "plugins",
-        label: "Plugins",
-        href: "/plugins",
-        icon: Puzzle,
-        badge: "8",
-        permissionKey: "plugins",
-        children: [
-          {
-            id: "installed",
-            label: "Plugins đã cài",
-            href: "/plugins",
-            icon: Package,
-            permissionKey: "plugins",
-          },
-          {
-            id: "add-new",
-            label: "Thêm mới",
-            href: "/plugins",
-            icon: Plus,
-            permissionKey: "plugins",
-            requiredOperation: "CREATE",
-          },
-        ],
+        id: "notifications",
+        label: "Notifications",
+        href: "/notifications",
+        icon: Bell,
+        permissionKey: "notifications",
       },
       {
-        id: "api",
-        label: "API",
-        href: "/api",
-        icon: Code,
-        permissionKey: "api",
-        children: [
-          {
-            id: "documentation",
-            label: "Documentation",
-            href: "/api/docs",
-            icon: FileText,
-            permissionKey: "api",
-          },
-          {
-            id: "keys",
-            label: "API Keys",
-            href: "/api/keys",
-            icon: Key,
-            permissionKey: "api",
-            requiredOperation: "UPDATE",
-          },
-          {
-            id: "webhooks",
-            label: "Webhooks",
-            href: "/api/webhooks",
-            icon: Zap,
-            permissionKey: "api",
-            requiredOperation: "UPDATE",
-          },
-        ],
-      },
-      {
-        id: "integrations",
-        label: "Integrations",
-        href: "/integrations",
-        icon: Layers,
-        permissionKey: "integrations",
-        children: [
-          {
-            id: "third-party",
-            label: "Third Party",
-            href: "/integrations/third-party",
-            icon: Globe,
-            permissionKey: "integrations",
-          },
-          {
-            id: "plugins",
-            label: "Plugins",
-            href: "/integrations/plugins",
-            icon: Plus,
-            permissionKey: "integrations",
-            requiredOperation: "UPDATE",
-          },
-          {
-            id: "extensions",
-            label: "Extensions",
-            href: "/integrations/extensions",
-            icon: Zap,
-            permissionKey: "integrations",
-            requiredOperation: "UPDATE",
-          },
-        ],
-      },
-      {
-        id: "backup",
-        label: "Backup & Restore",
-        href: "/backup",
-        icon: Database,
-        permissionKey: "backup",
-        children: [
-          {
-            id: "create-backup",
-            label: "Create Backup",
-            href: "/backup/create",
-            icon: Download,
-            permissionKey: "backup",
-            requiredOperation: "CREATE",
-          },
-          {
-            id: "restore",
-            label: "Restore",
-            href: "/backup/restore",
-            icon: Upload,
-            permissionKey: "backup",
-            requiredOperation: "UPDATE",
-          },
-          {
-            id: "schedule",
-            label: "Schedule",
-            href: "/backup/schedule",
-            icon: Clock,
-            permissionKey: "backup",
-            requiredOperation: "UPDATE",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "configuration",
-    label: "Configuration",
-    items: [
-      {
-        id: "app-config",
-        label: "App Config",
-        href: "/config/app",
-        icon: Settings,
-        permissionKey: "app_config",
-      },
-      {
-        id: "profile-setting",
-        label: "Profile Setting",
-        href: "/config/profile",
-        icon: Users2,
-        permissionKey: "profile_setting",
-      },
-      {
-        id: "role-permission",
-        label: "Role & Permission",
-        href: "/config/roles",
-        icon: Shield,
-        permissionKey: "role_permission",
-      },
-      {
-        id: "users",
-        label: "Users",
-        href: "/config/users",
-        icon: Users2,
-        permissionKey: "users",
-      },
-      {
-        id: "products",
-        label: "Products",
-        href: "/config/products",
-        icon: Package,
-        permissionKey: "products",
-      },
-      {
-        id: "visa-types",
-        label: "Visa Types",
-        href: "/config/visa-types",
-        icon: FileText,
-        permissionKey: "visa_types",
-      },
-      {
-        id: "room-types",
-        label: "Room Types",
-        href: "/config/room-types",
-        icon: Building2,
-        permissionKey: "room_types",
-      },
-      {
-        id: "transport-types",
-        label: "Transport Types",
-        href: "/config/transport-types",
-        icon: Truck,
-        permissionKey: "transport_types",
-      },
-      {
-        id: "departments",
-        label: "Departments",
-        href: "/config/departments",
-        icon: Building2,
-        permissionKey: "departments",
-      },
-      {
-        id: "employee",
-        label: "Employee",
-        href: "/config/employee",
-        icon: Users2,
-        permissionKey: "employee",
-      },
-      {
-        id: "tour-group",
-        label: "Tour Group",
-        href: "/config/tour-group",
-        icon: Users2,
-        permissionKey: "tour_group",
-      },
-      {
-        id: "airports",
-        label: "Airports",
-        href: "/config/airports",
-        icon: Globe,
-        permissionKey: "airports",
-      },
-      {
-        id: "airlines",
-        label: "Airlines",
-        href: "/config/airlines",
-        icon: Globe,
-        permissionKey: "airlines",
-      },
-      {
-        id: "database-backup",
-        label: "Database Backup",
-        href: "/config/backup",
-        icon: Database,
-        permissionKey: "database_backup",
-      },
-    ],
-  },
-  {
-    id: "reports",
-    label: "Reports",
-    items: [
-      {
-        id: "client-ledger",
-        label: "Client Ledger",
-        href: "/reports/client-ledger",
-        icon: FileText,
-        permissionKey: "client_ledger",
-      },
-      {
-        id: "vendor-ledger",
-        label: "Vendor Ledger",
-        href: "/reports/vendor-ledger",
-        icon: FileText,
-        permissionKey: "vendor_ledger",
-      },
-      {
-        id: "account-ledger",
-        label: "Account Ledger",
-        href: "/reports/account-ledger",
-        icon: FileText,
-        permissionKey: "account_ledger",
-      },
-      {
-        id: "client-due-advance",
-        label: "Client Due/Advance",
-        href: "/reports/client-due-advance",
-        icon: DollarSign,
-        permissionKey: "client_due_advance",
-      },
-      {
-        id: "vendor-due-advance",
-        label: "Vendor Due/Advance",
-        href: "/reports/vendor-due-advance",
-        icon: DollarSign,
-        permissionKey: "vendor_due_advance",
-      },
-      {
-        id: "profit-loss",
-        label: "Profit & Loss",
-        href: "/reports/profit-loss",
-        icon: PieChart,
-        permissionKey: "profit_loss",
-      },
-      {
-        id: "login-history",
-        label: "Login History",
-        href: "/reports/login-history",
-        icon: Clock,
-        permissionKey: "login_history",
-      },
-      {
-        id: "audit-trail",
-        label: "Audit Trail",
-        href: "/reports/audit-trail",
-        icon: Eye,
-        permissionKey: "audit_trail",
+        id: "announcements",
+        label: "Announcements",
+        href: "/announcements",
+        icon: MessageSquare,
+        permissionKey: "announcements",
       },
     ],
   },
