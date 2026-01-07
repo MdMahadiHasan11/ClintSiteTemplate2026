@@ -1,0 +1,132 @@
+"use client";
+
+import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
+import Sidebar from "./sidebar";
+import TopNav from "./top-nav";
+
+interface LayoutProps {
+  children: ReactNode;
+}
+
+type MenuState = "full" | "collapsed" | "hidden";
+
+export default function Layout({ children }: LayoutProps) {
+  // Remove mounted state entirely — we'll use a ref + conditional rendering trick
+  const [menuState, setMenuState] = useState<MenuState>("full");
+  const [isMobile, setIsMobile] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(256);
+  const [mobileMenuState, setMobileMenuState] =
+    useState<MenuState>("collapsed");
+  const [previousDesktopState, setPreviousDesktopState] =
+    useState<MenuState>("full");
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const isDesktop = window.innerWidth >= 1024;
+      setIsMobile(!isDesktop);
+
+      if (!isDesktop) {
+        if (menuState !== "hidden") {
+          setPreviousDesktopState(menuState);
+        }
+      } else {
+        if (menuState === "hidden" && previousDesktopState !== "hidden") {
+          setMenuState(previousDesktopState);
+        }
+      }
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [menuState, previousDesktopState]);
+
+  const toggleMenuState = () => {
+    if (isMobile) {
+      setMobileMenuState((prev) => {
+        switch (prev) {
+          case "collapsed":
+            return "full";
+          case "full":
+            return "hidden";
+          case "hidden":
+            return "collapsed";
+          default:
+            return "collapsed";
+        }
+      });
+    } else {
+      setMenuState((prev) => {
+        switch (prev) {
+          case "full":
+            return "collapsed";
+          case "collapsed":
+            return "hidden";
+          case "hidden":
+            return "full";
+          default:
+            return "full";
+        }
+      });
+    }
+  };
+
+  const handleOutsideClick = () => {
+    if (isMobile && mobileMenuState === "full") {
+      setMobileMenuState("collapsed");
+    }
+  };
+
+  const getMarginLeft = () => {
+    if (isMobile) {
+      if (mobileMenuState === "hidden") return "0";
+      if (mobileMenuState === "collapsed") return "4rem";
+      return "0";
+    }
+    if (menuState === "hidden") return "0";
+    if (menuState === "collapsed") return "4rem";
+    return `${sidebarWidth}px`;
+  };
+
+  // Render nothing on first server render (avoids hydration mismatch)
+  // Then instantly render on client — no setState in effect needed
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  return (
+    <div className="flex h-screen">
+      <Sidebar
+        menuState={menuState}
+        mobileMenuState={mobileMenuState}
+        isMobile={isMobile}
+        sidebarWidth={sidebarWidth}
+        onToggleMenuState={toggleMenuState}
+        onSetMenuState={setMenuState}
+        onSidebarWidthChange={setSidebarWidth}
+        onMobileMenuStateChange={setMobileMenuState}
+      />
+
+      {isMobile && mobileMenuState === "full" && (
+        <div
+          className="fixed inset-0 bg-black/30 z-40"
+          onClick={handleOutsideClick}
+        />
+      )}
+
+      <div
+        className="w-full flex flex-1 flex-col transition-all duration-300 ease-in-out min-w-0"
+        style={{ marginLeft: getMarginLeft() }}
+      >
+        <header className="h-16 border-b border-gray-200 dark:border-[#1F1F23] shrink-0">
+          <TopNav onToggleMenu={toggleMenuState} />
+        </header>
+        <main className="flex-1 overflow-auto p-2 sm:p-6 bg-white dark:bg-[#0F0F12] min-w-0 relative z-10">
+          {children}
+        </main>
+      </div>
+    </div>
+  );
+}
