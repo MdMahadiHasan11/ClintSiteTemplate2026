@@ -67,6 +67,7 @@ export default function Sidebar({
     });
   };
 
+  //sidebar resizer
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     const startX = e.clientX;
